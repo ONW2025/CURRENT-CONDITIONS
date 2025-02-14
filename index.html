@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Draggable City, Temperature, Feels Like, Humidity, Dewpoint, Wind & Conditions Boxes</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: sans-serif;
+      /* Removed the background image from the body */
+      background-color: #000; /* fallback background */
+      color: white;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    }
+    /* Fixed container for 1920x1080 with background image */
+    #draggable-container {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      margin: 0 auto; /* centers the container horizontally */
+      background: url('background.png') no-repeat center center;
+      background-size: cover; /* adjust as needed: cover, contain, or a fixed size */
+    }
+    .draggable {
+      position: absolute;
+      cursor: move;
+      user-select: none;
+    }
+    .city-box {
+      width: 500px;
+      height: 50px;
+      border: 0px solid white;
+      background: rgba(0, 0, 0, 0);
+      text-align: center;
+      line-height: 50px;
+      font-size: 58px;
+      font-family: 'Overpass Black', sans-serif;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    }
+    .city-name {
+      text-transform: uppercase;
+    }
+    .temp-box {
+      width: 175px;
+      height: 40px;
+      font-size: 70px;
+      font-family: 'Overpass Black', sans-serif;
+      border: 0px solid white;
+      background: rgba(0, 0, 0, 0);
+      text-align: center;
+      line-height: 50px;
+      padding-right: 10px;
+    }
+    .feels-box {
+      width: 200px;
+      height: 50px;
+      font-size: 48px;
+      font-family: 'Arial', sans-serif;
+      border: 2px solid white;
+      background: rgba(0, 0, 0, 0.6);
+      text-align: left;
+      line-height: 50px;
+      padding-left: 10px;
+      position: relative;
+    }
+    .humidity-box {
+      width: 200px;
+      height: 50px;
+      font-size: 48px;
+      font-family: 'Overpass Black', sans-serif;
+      border: 0px solid white;
+      background: rgba(0, 0, 0, 0);
+      text-align: left;
+      line-height: 50px;
+      position: relative;
+    }
+    .dewpoint-box {
+      width: 200px;
+      height: 50px;
+      font-size: 48px;
+      font-family: 'Arial', sans-serif;
+      border: 2px solid white;
+      background: rgba(0, 0, 0, 0.6);
+      text-align: left;
+      line-height: 50px;
+      position: relative;
+    }
+    .wind-box {
+      width: 400px;
+      height: 50px;
+      font-size: 48px;
+      font-family: 'Arial', sans-serif;
+      border: 0px solid white;
+      background: rgba(0, 0, 0, 0);
+      text-align: left;
+      line-height: 50px;
+      padding-left: 10px;
+      position: absolute;
+      color: cyan;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    }
+    /* New Conditions Box Styling */
+    .condition-box {
+      width: 240px;
+      height: 50px;
+      font-size: 20px;
+      font-family: 'Arial', sans-serif;
+      border: 0px solid white;
+      background: rgba(0, 0, 0, 0.7);
+      text-align: center;
+      line-height: 50px;
+      padding-left: 10px;
+      position: absolute;
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    }
+    .dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid white;
+      z-index: 100;
+    }
+    .city-box:hover .dropdown {
+      display: block;
+    }
+    .dropdown-item {
+      padding: 5px;
+      border-bottom: 1px solid #555;
+      cursor: pointer;
+      text-align: center;
+    }
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+    .dropdown-item:hover {
+      background: #444;
+    }
+    .drag-info {
+      display: none;
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      padding: 3px 5px;
+      font-size: 0.8em;
+      border: 1px solid white;
+      white-space: nowrap;
+      z-index: 9999;
+    }
+    .draggable:hover .drag-info {
+      display: block;
+    }
+  </style>
+  <!-- Include html2canvas library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+  <h1></h1>
+  <div id="draggable-container">
+    <!-- City Boxes -->
+    <div class="draggable city-box" id="city-box-1">
+      <span class="city-name">Select City</span>
+      <div class="dropdown"></div>
+      <div class="drag-info"></div>
+    </div>
+    <div class="draggable city-box" id="city-box-2">
+      <span class="city-name">Select City</span>
+      <div class="dropdown"></div>
+      <div class="drag-info"></div>
+    </div>
+    <div class="draggable city-box" id="city-box-3">
+      <span class="city-name">Select City</span>
+      <div class="dropdown"></div>
+      <div class="drag-info"></div>
+    </div>
+    <div class="draggable city-box" id="city-box-4">
+      <span class="city-name">Select City</span>
+      <div class="dropdown"></div>
+      <div class="drag-info"></div>
+    </div>
+    <!-- Temperature Boxes -->
+    <div class="draggable temp-box" id="temp-box-1">--</div>
+    <div class="draggable temp-box" id="temp-box-2">--</div>
+    <div class="draggable temp-box" id="temp-box-3">--</div>
+    <div class="draggable temp-box" id="temp-box-4">--</div>
+    <!-- Feels Like Boxes -->
+    <div class="draggable feels-box" id="feels-box-1">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable feels-box" id="feels-box-2">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable feels-box" id="feels-box-3">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable feels-box" id="feels-box-4">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <!-- Humidity Boxes -->
+    <div class="draggable humidity-box" id="humidity-box-1">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable humidity-box" id="humidity-box-2">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable humidity-box" id="humidity-box-3">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable humidity-box" id="humidity-box-4">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <!-- Dewpoint Boxes -->
+    <div class="draggable dewpoint-box" id="dewpoint-box-1">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable dewpoint-box" id="dewpoint-box-2">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable dewpoint-box" id="dewpoint-box-3">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable dewpoint-box" id="dewpoint-box-4">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <!-- Wind Boxes -->
+    <div class="draggable wind-box" id="wind-box-1">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable wind-box" id="wind-box-2">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable wind-box" id="wind-box-3">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable wind-box" id="wind-box-4">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <!-- Conditions Boxes -->
+    <div class="draggable condition-box" id="condition-box-1">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable condition-box" id="condition-box-2">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable condition-box" id="condition-box-3">
+      <div class="drag-info"></div>
+      --
+    </div>
+    <div class="draggable condition-box" id="condition-box-4">
+      <div class="drag-info"></div>
+      --
+    </div>
+  </div>
+
+  <script>
+    /***************************************
+     * Station Code Mappings
+     ***************************************/
+    // Weather Underground station codes and display names.
+    const wuStations = {
+      'KOHCHILL102': 'Chillicothe',
+      'KOHCOLUM839': 'Columbus',
+      'KOHDAYTO48': 'Dayton',
+      'KOHCINCI470': 'Cincinnati',
+      'KOHGALLI12': 'Gallipolis',
+      'KOHTOLED157': 'Toledo',
+      'KOHCLEVE358': 'Cleveland',
+      'KOHYOUNG19': 'Youngstown',
+      'KOHSAINT20': 'St. Clairsville',
+      'KOHMARIE95': 'Marietta',
+      'KOHDEFIA24': 'Defiance',
+      'KOHCELIN50': 'Celina',
+      'KOHLIMA26': 'Lima',
+      'KOHFINDL57': 'Findlay',
+      'KOHBELLE16': 'Bellefontaine',
+      'KOHMARIO107': 'Marion',
+      'KOHWILMI89': 'Wilmington',
+      'KOHGEORG3': 'Georgetown',
+      'KOHPORTS28': 'Portsmouth',
+      'KOHLOGAN27': 'Logan',
+      'KOHZANES81': 'Zanesville',
+      'KOHMOUNT134': 'Mt. Vernon',
+      'KOHMANSF8': 'Mansfield',
+      'KOHSANDU69': 'Sandusky',
+      'KOHASHTA21': 'Ashtabula',
+      'KOHAKRON234': 'Akron',
+      'KOHCANTO106': 'Canton',
+      'KOHCOSHO14': 'Coshocton'
+    };
+
+    // Mapping from Weather Underground station codes to NWS station codes.
+    const nwsMapping = {
+      'KOHCHILL102': 'KRZT',
+      'KOHCOLUM839': 'KCMH',
+      'KOHDAYTO48': 'KDAY',
+      'KOHCINCI470': 'KLUK',
+      'KOHGALLI12': 'KJRO',
+      'KOHTOLED157': 'KTOL',
+      'KOHCLEVE358': 'KCLE',
+      'KOHYOUNG19': 'KYNG',
+      'KOHSAINT20': 'KHLG',
+      'KOHMARIE95': 'KPKB',
+      'KOHDEFIA24': 'KDFI',
+      'KOHCELIN50': 'KAXV',
+      'KOHLIMA26': 'KAOH',
+      'KOHFINDL57': 'KFDY',
+      'KOHBELLE16': 'KEDJ',
+      'KOHMARIO107': 'KMNN',
+      'KOHWILMI89': 'KILN',
+      'KOHGEORG3': 'KI69',
+      'KOHPORTS28': 'KPMH',
+      'KOHLOGAN27': 'KLHQ',
+      'KOHZANES81': 'KZZV',
+      'KOHMOUNT134': 'KMFD',
+      'KOHMANSF8': 'KMFD',
+      'KOHSANDU69': 'KS24',
+      'KOHASHTA21': 'KHZY',
+      'KOHAKRON234': 'KCAK',
+      'KOHCANTO106': 'KCAK',
+      'KOHCOSHO14': 'KZZV'
+    };
+
+    // Store the selected WU station for each city box (indices 0–3)
+    let selectedStations = [null, null, null, null];
+
+    /***************************************
+     * Box Style Configuration Objects
+     ***************************************/
+    const tempBoxConfig = {
+      fontSize: '135px',
+      fontFamily: "'Overpass Black', sans-serif",
+      color: 'Yellow',
+      textShadow: '2px 2px 4px rgba(0,0,0,1)'
+    };
+    const feelsBoxConfig = {
+      fontSize: '48px',
+      fontFamily: "'Overpass Black', sans-serif",
+      color: 'White',
+      textGlow: '0 0 5px rgba(0,0,0,0.8)',
+      background: 'rgba(0,0,0,0)',
+      border: '0px solid white'
+    };
+    const humidityBoxConfig = {
+      fontSize: '48px',
+      fontFamily: "'Overpass Black', sans-serif",
+      color: 'White',
+      textShadow: '0 0 5px rgba(0,0,0,0.8)',
+      background: 'rgba(0,0,0,0)',
+      border: '0px solid white'
+    };
+    const dewpointBoxConfig = {
+      fontSize: '48px',
+      fontFamily: "'Overpass Black', sans-serif",
+      color: 'White',
+      textShadow: '0 0 5px rgba(0,0,0,0.8)',
+      background: 'rgba(0,0,0,0)',
+      border: '0px solid white'
+    };
+    const windBoxConfig = {
+      fontSize: '32px',
+      fontFamily: "'Overpass Black', sans-serif",
+      color: 'White',
+      textShadow: '2px 2px 4px rgba(0,0,0,0.7)'
+    };
+    const cityNameConfig = {
+      fontSize: '58px',
+      color: 'white'
+    };
+
+    /***************************************
+     * Initial Positions (Adjustable)
+     ***************************************/
+    const initialPositions = {
+      city: {
+        'city-box-1': { top: 192, left: 133 },
+        'city-box-2': { top: 192, left: 1200 },
+        'city-box-3': { top: 686, left: 133 },
+        'city-box-4': { top: 686, left: 1200 }
+      },
+      temp: {
+        'temp-box-1': { top: 350, left: 115 },
+        'temp-box-2': { top: 350, left: 1175 },
+        'temp-box-3': { top: 840, left: 115 },
+        'temp-box-4': { top: 840, left: 1175 }
+      },
+      feels: {
+        'feels-box-1': { top: 254, left: 595 },
+        'feels-box-2': { top: 204, left: 1650 },
+        'feels-box-3': { top: 647, left: 595 },
+        'feels-box-4': { top: 597, left: 1650 }
+      },
+      humidity: {
+        'humidity-box-1': { top: 203, left: 585 },
+        'humidity-box-2': { top: 154, left: 1640 },
+        'humidity-box-3': { top: 598, left: 585 },
+        'humidity-box-4': { top: 548, left: 1640 }
+      },
+      dew: {
+        'dewpoint-box-1': { top: 80, left: 595 },
+        'dewpoint-box-2': { top: 30, left: 1660 },
+        'dewpoint-box-3': { top: 472, left: 595 },
+        'dewpoint-box-4': { top: 422, left: 1660 }
+      },
+      wind: {
+        'wind-box-1': { top: 331, left: 480 },
+        'wind-box-2': { top: 331, left: 1550 },
+        'wind-box-3': { top: 825, left: 480 },
+        'wind-box-4': { top: 825, left: 1550 }
+      },
+      conditions: {
+        'condition-box-1': { top: 476, left: 75 },
+        'condition-box-2': { top: 476, left: 1140 },
+        'condition-box-3': { top: 966, left: 75 },
+        'condition-box-4': { top: 966, left: 1140 }
+      }
+    };
+
+    // Set each box’s initial position.
+    function setInitialPositions() {
+      for (let group in initialPositions) {
+        for (let boxId in initialPositions[group]) {
+          const box = document.getElementById(boxId);
+          const pos = initialPositions[group][boxId];
+          box.style.top = pos.top + 'px';
+          box.style.left = pos.left + 'px';
+          // Apply style configurations to boxes when appropriate.
+          if (box.classList.contains('temp-box')) {
+            box.style.fontSize = tempBoxConfig.fontSize;
+            box.style.fontFamily = tempBoxConfig.fontFamily;
+            box.style.color = tempBoxConfig.color;
+            box.style.textShadow = tempBoxConfig.textShadow;
+          } else if (box.classList.contains('feels-box')) {
+            box.style.fontSize = feelsBoxConfig.fontSize;
+            box.style.fontFamily = feelsBoxConfig.fontFamily;
+            box.style.color = feelsBoxConfig.color;
+            box.style.textShadow = feelsBoxConfig.textShadow;
+            box.style.background = feelsBoxConfig.background;
+            box.style.border = feelsBoxConfig.border;
+          } else if (box.classList.contains('humidity-box')) {
+            box.style.fontSize = humidityBoxConfig.fontSize;
+            box.style.fontFamily = humidityBoxConfig.fontFamily;
+            box.style.color = humidityBoxConfig.color;
+            box.style.textShadow = humidityBoxConfig.textShadow;
+            box.style.background = humidityBoxConfig.background;
+            box.style.border = humidityBoxConfig.border;
+          } else if (box.classList.contains('dewpoint-box')) {
+            box.style.fontSize = dewpointBoxConfig.fontSize;
+            box.style.fontFamily = dewpointBoxConfig.fontFamily;
+            box.style.color = dewpointBoxConfig.color;
+            box.style.textShadow = dewpointBoxConfig.textShadow;
+            box.style.background = dewpointBoxConfig.background;
+            box.style.border = dewpointBoxConfig.border;
+          } else if (box.classList.contains('wind-box')) {
+            box.style.fontSize = windBoxConfig.fontSize;
+            box.style.fontFamily = windBoxConfig.fontFamily;
+            box.style.color = windBoxConfig.color;
+            box.style.textShadow = windBoxConfig.textShadow;
+          }
+        }
+      }
+      // Apply city name configuration to all .city-name elements.
+      document.querySelectorAll('.city-name').forEach(el => {
+        el.style.fontSize = cityNameConfig.fontSize;
+        el.style.color = cityNameConfig.color;
+        el.style.textTransform = 'uppercase';
+      });
+    }
+
+    /***************************************
+     * Drag and Drop Functionality
+     ***************************************/
+    function makeDraggable(el) {
+      let offsetX = 0, offsetY = 0, isDragging = false;
+      el.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        offsetX = e.clientX - el.offsetLeft;
+        offsetY = e.clientY - el.offsetTop;
+        document.body.style.userSelect = 'none';
+      });
+      document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        el.style.left = (e.clientX - offsetX) + 'px';
+        el.style.top = (e.clientY - offsetY) + 'px';
+        updateDragInfo(el);
+      });
+      document.addEventListener('mouseup', function() {
+        if (isDragging) {
+          isDragging = false;
+          document.body.style.userSelect = '';
+        }
+      });
+    }
+    function updateDragInfo(el) {
+      const infoBox = el.querySelector('.drag-info');
+      if (infoBox) {
+        const topVal = parseInt(el.style.top, 10);
+        const leftVal = parseInt(el.style.left, 10) + el.offsetWidth / 2;
+        infoBox.textContent = `Top: ${topVal}px, Left: ${Math.round(leftVal)}px`;
+      }
+    }
+
+    /***************************************
+     * Populate Dropdowns for City Boxes (Using WU Stations)
+     ***************************************/
+    function populateDropdowns() {
+      const sortedStationIds = Object.keys(wuStations).sort((a, b) => {
+        return wuStations[a].localeCompare(wuStations[b]);
+      });
+      for (let i = 1; i <= 4; i++) {
+        const cityBox = document.getElementById(`city-box-${i}`);
+        const dropdown = cityBox.querySelector('.dropdown');
+        dropdown.innerHTML = '';
+        sortedStationIds.forEach(stationId => {
+          const item = document.createElement('div');
+          item.className = 'dropdown-item';
+          item.textContent = wuStations[stationId];
+          item.dataset.stationId = stationId;
+          item.addEventListener('click', function(e) {
+            e.stopPropagation();
+            selectCity(i, stationId);
+          });
+          dropdown.appendChild(item);
+        });
+      }
+    }
+
+    /***************************************
+     * City Selection and Data Updates
+     ***************************************/
+    function selectCity(boxIndex, stationId) {
+      selectedStations[boxIndex - 1] = stationId;
+      // Update city box display
+      const cityBox = document.getElementById(`city-box-${boxIndex}`);
+      cityBox.querySelector('.city-name').textContent = wuStations[stationId];
+      // Update all data boxes using the Weather Underground API
+      updateTemperatureBox(boxIndex, stationId);
+      updateFeelsBox(boxIndex, stationId);
+      updateHumidityBox(boxIndex, stationId);
+      updateDewpointBox(boxIndex, stationId);
+      updateWindBox(boxIndex, stationId);
+      // Update conditions box using the NWS API (via the nwsMapping)
+      updateConditionBox(boxIndex, stationId);
+    }
+
+    // Weather Underground API calls (for temperature, feels like, humidity, dewpoint, wind)
+    function fetchWeather(stationId) {
+      const apiUrl = `https://api.weather.com/v2/pws/observations/current?stationId=${stationId}&format=json&units=e&apiKey=8caa9f6756a74d03aa9f6756a79d03a3`;
+      return fetch(apiUrl)
+        .then(response => {
+          if (!response.ok) throw new Error('Network error');
+          return response.json();
+        })
+        .then(data => data.observations[0].imperial.temp)
+        .catch(error => {
+          console.error('Error fetching weather for station ' + stationId, error);
+          return 'N/A';
+        });
+    }
+    function updateTemperatureBox(boxIndex, stationId) {
+      const tempBox = document.getElementById(`temp-box-${boxIndex}`);
+      tempBox.textContent = 'Loading...';
+      fetchWeather(stationId).then(temp => {
+        tempBox.textContent = temp;
+      });
+    }
+    function getFeelsLike(observation) {
+      const temp = observation.imperial.temp;
+      const windChill = observation.imperial.windChill;
+      const heatIndex = observation.imperial.heatIndex;
+      if (windChill !== undefined && windChill < temp) return windChill;
+      if (heatIndex !== undefined && heatIndex > temp) return heatIndex;
+      return temp;
+    }
+    function fetchFeelsLike(stationId) {
+      const apiUrl = `https://api.weather.com/v2/pws/observations/current?stationId=${stationId}&format=json&units=e&apiKey=8caa9f6756a74d03aa9f6756a79d03a3`;
+      return fetch(apiUrl)
+        .then(response => {
+          if (!response.ok) throw new Error('Network error');
+          return response.json();
+        })
+        .then(data => getFeelsLike(data.observations[0]))
+        .catch(error => {
+          console.error('Error fetching feels like for station ' + stationId, error);
+          return 'N/A';
+        });
+    }
+    function updateFeelsBox(boxIndex, stationId) {
+      const feelsBox = document.getElementById(`feels-box-${boxIndex}`);
+      feelsBox.textContent = 'Loading...';
+      fetchFeelsLike(stationId).then(feels => {
+        feelsBox.textContent = feels;
+      });
+    }
+    function fetchHumidity(stationId) {
+      const apiUrl = `https://api.weather.com/v2/pws/observations/current?stationId=${stationId}&format=json&units=e&apiKey=8caa9f6756a74d03aa9f6756a79d03a3`;
+      return fetch(apiUrl)
+        .then(response => {
+          if (!response.ok) throw new Error('Network error');
+          return response.json();
+        })
+        .then(data => data.observations[0].humidity)
+        .catch(error => {
+          console.error('Error fetching humidity for station ' + stationId, error);
+          return 'N/A';
+        });
+    }
+    function updateHumidityBox(boxIndex, stationId) {
+      const humBox = document.getElementById(`humidity-box-${boxIndex}`);
+      humBox.textContent = 'Loading...';
+      fetchHumidity(stationId).then(humidity => {
+        humBox.textContent = humidity + '%';
+      });
+    }
+    function fetchDewpoint(stationId) {
+      const apiUrl = `https://api.weather.com/v2/pws/observations/current?stationId=${stationId}&format=json&units=e&apiKey=8caa9f6756a74d03aa9f6756a79d03a3`;
+      return fetch(apiUrl)
+        .then(response => {
+          if (!response.ok) throw new Error('Network error');
+          return response.json();
+        })
+        .then(data => data.observations[0].imperial.dewpoint || data.observations[0].imperial.dewpt)
+        .catch(error => {
+          console.error('Error fetching dewpoint for station ' + stationId, error);
+          return 'N/A';
+        });
+    }
+    function updateDewpointBox(boxIndex, stationId) {
+      const dewBox = document.getElementById(`dewpoint-box-${boxIndex}`);
+      dewBox.textContent = 'Loading...';
+      fetchDewpoint(stationId).then(dew => {
+        dewBox.textContent = dew;
+      });
+    }
+    function getCardinalDirection(degree) {
+      if (typeof degree !== 'number' || isNaN(degree)) return 'N/A';
+      const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 
+                          'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+      return directions[Math.floor((degree + 11.25) / 22.5) % 16];
+    }
+    function fetchWind(stationId) {
+      const apiUrl = `https://api.weather.com/v2/pws/observations/current?stationId=${stationId}&format=json&units=e&apiKey=8caa9f6756a74d03aa9f6756a79d03a3`;
+      return fetch(apiUrl)
+        .then(response => {
+          if (!response.ok) throw new Error('Network error');
+          return response.json();
+        })
+        .then(data => {
+          const obs = data.observations[0];
+          const windDir = (obs.imperial.windDir !== undefined) ? obs.imperial.windDir : (obs.winddir !== undefined ? obs.winddir : 0);
+          return {
+            windSpeed: obs.imperial.windSpeed,
+            windDir: windDir
+          };
+        })
+        .catch(error => {
+          console.error('Error fetching wind data for station ' + stationId, error);
+          return { windSpeed: 'N/A', windDir: 0 };
+        });
+    }
+    function updateWindBox(boxIndex, stationId) {
+      const windBox = document.getElementById(`wind-box-${boxIndex}`);
+      windBox.textContent = 'Loading...';
+      fetchWind(stationId).then(wind => {
+        const direction = getCardinalDirection(wind.windDir);
+        windBox.textContent = `${direction} ${wind.windSpeed} mph`;
+      });
+    }
+
+    /***************************************
+     * NWS API – Fetching the Current Condition (Async/Await)
+     ***************************************/
+    async function fetchCondition(stationCode) {
+      try {
+        const response = await fetch(`https://api.weather.gov/stations/${stationCode}/observations/latest`, {
+          headers: { "User-Agent": "WeatherWidget/1.0 (your.email@example.com)" }
+        });
+        if (!response.ok) throw new Error("Network response was not ok");
+        const data = await response.json();
+        let condition = data.properties.textDescription;
+        if (!condition) return "N/A";
+        return condition;
+      } catch (error) {
+        console.error("Error fetching condition for station " + stationCode, error);
+        return "Err";
+      }
+    }
+
+    async function updateConditionBox(boxIndex, stationId) {
+      const conditionBox = document.getElementById(`condition-box-${boxIndex}`);
+      conditionBox.textContent = "Loading...";
+      const nwsStationCode = nwsMapping[stationId];
+      if (!nwsStationCode) {
+        console.error("No NWS station code found for: " + stationId);
+        conditionBox.textContent = "Mapping Error";
+        return;
+      }
+      const condition = await fetchCondition(nwsStationCode);
+      conditionBox.textContent = condition;
+    }
+
+    /***************************************
+     * Initialization
+     ***************************************/
+    document.addEventListener('DOMContentLoaded', () => {
+      setInitialPositions();
+      populateDropdowns();
+      document.querySelectorAll('.draggable').forEach(el => {
+        makeDraggable(el);
+        updateDragInfo(el);
+      });
+
+      // Right-click on the container to save the background with overlay
+      document.getElementById('draggable-container').addEventListener('contextmenu', function(e) {
+        e.preventDefault(); // Prevent the default context menu
+        html2canvas(this, { useCORS: true }).then(canvas => {
+          // Create a temporary link to trigger the download
+          const link = document.createElement('a');
+          link.download = 'background-overlay.png';
+          link.href = canvas.toDataURL();
+          link.click();
+        });
+      });
+    });
+  </script>
+</body>
+</html>
