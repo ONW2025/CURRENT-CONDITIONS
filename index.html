@@ -9,9 +9,13 @@
       margin: 0;
       padding: 20px;
       font-family: sans-serif;
-      /* Removed the background image from the body */
       background-color: #000; /* fallback background */
       color: white;
+    }
+    /* Blur the main content until password is accepted */
+    #main-content {
+      filter: blur(5px);
+      transition: filter 0.3s ease;
     }
     h1 {
       text-align: center;
@@ -25,7 +29,7 @@
       height: 1080px;
       margin: 0 auto; /* centers the container horizontally */
       background: url('background.png') no-repeat center center;
-      background-size: cover; /* adjust as needed: cover, contain, or a fixed size */
+      background-size: cover;
     }
     .draggable {
       position: absolute;
@@ -105,7 +109,6 @@
       color: cyan;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
     }
-    /* New Conditions Box Styling */
     .condition-box {
       width: 240px;
       height: 50px;
@@ -163,123 +166,176 @@
     .draggable:hover .drag-info {
       display: block;
     }
+    /* Password Overlay Styles */
+    #password-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    #password-container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    #password-container input[type="password"] {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      width: 300px;
+    }
+    #password-container button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: none;
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    #password-error {
+      color: red;
+      margin-top: 10px;
+    }
   </style>
   <!-- Include html2canvas library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-  <h1></h1>
-  <div id="draggable-container">
-    <!-- City Boxes -->
-    <div class="draggable city-box" id="city-box-1">
-      <span class="city-name">Select City</span>
-      <div class="dropdown"></div>
-      <div class="drag-info"></div>
+  <!-- Main content wrapped for blur effect -->
+  <div id="main-content">
+    <h1></h1>
+    <div id="draggable-container">
+      <!-- City Boxes -->
+      <div class="draggable city-box" id="city-box-1">
+        <span class="city-name">Select City</span>
+        <div class="dropdown"></div>
+        <div class="drag-info"></div>
+      </div>
+      <div class="draggable city-box" id="city-box-2">
+        <span class="city-name">Select City</span>
+        <div class="dropdown"></div>
+        <div class="drag-info"></div>
+      </div>
+      <div class="draggable city-box" id="city-box-3">
+        <span class="city-name">Select City</span>
+        <div class="dropdown"></div>
+        <div class="drag-info"></div>
+      </div>
+      <div class="draggable city-box" id="city-box-4">
+        <span class="city-name">Select City</span>
+        <div class="dropdown"></div>
+        <div class="drag-info"></div>
+      </div>
+      <!-- Temperature Boxes -->
+      <div class="draggable temp-box" id="temp-box-1">--</div>
+      <div class="draggable temp-box" id="temp-box-2">--</div>
+      <div class="draggable temp-box" id="temp-box-3">--</div>
+      <div class="draggable temp-box" id="temp-box-4">--</div>
+      <!-- Feels Like Boxes -->
+      <div class="draggable feels-box" id="feels-box-1">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable feels-box" id="feels-box-2">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable feels-box" id="feels-box-3">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable feels-box" id="feels-box-4">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <!-- Humidity Boxes -->
+      <div class="draggable humidity-box" id="humidity-box-1">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable humidity-box" id="humidity-box-2">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable humidity-box" id="humidity-box-3">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable humidity-box" id="humidity-box-4">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <!-- Dewpoint Boxes -->
+      <div class="draggable dewpoint-box" id="dewpoint-box-1">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable dewpoint-box" id="dewpoint-box-2">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable dewpoint-box" id="dewpoint-box-3">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable dewpoint-box" id="dewpoint-box-4">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <!-- Wind Boxes -->
+      <div class="draggable wind-box" id="wind-box-1">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable wind-box" id="wind-box-2">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable wind-box" id="wind-box-3">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable wind-box" id="wind-box-4">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <!-- Conditions Boxes -->
+      <div class="draggable condition-box" id="condition-box-1">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable condition-box" id="condition-box-2">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable condition-box" id="condition-box-3">
+        <div class="drag-info"></div>
+        --
+      </div>
+      <div class="draggable condition-box" id="condition-box-4">
+        <div class="drag-info"></div>
+        --
+      </div>
     </div>
-    <div class="draggable city-box" id="city-box-2">
-      <span class="city-name">Select City</span>
-      <div class="dropdown"></div>
-      <div class="drag-info"></div>
-    </div>
-    <div class="draggable city-box" id="city-box-3">
-      <span class="city-name">Select City</span>
-      <div class="dropdown"></div>
-      <div class="drag-info"></div>
-    </div>
-    <div class="draggable city-box" id="city-box-4">
-      <span class="city-name">Select City</span>
-      <div class="dropdown"></div>
-      <div class="drag-info"></div>
-    </div>
-    <!-- Temperature Boxes -->
-    <div class="draggable temp-box" id="temp-box-1">--</div>
-    <div class="draggable temp-box" id="temp-box-2">--</div>
-    <div class="draggable temp-box" id="temp-box-3">--</div>
-    <div class="draggable temp-box" id="temp-box-4">--</div>
-    <!-- Feels Like Boxes -->
-    <div class="draggable feels-box" id="feels-box-1">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable feels-box" id="feels-box-2">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable feels-box" id="feels-box-3">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable feels-box" id="feels-box-4">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <!-- Humidity Boxes -->
-    <div class="draggable humidity-box" id="humidity-box-1">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable humidity-box" id="humidity-box-2">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable humidity-box" id="humidity-box-3">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable humidity-box" id="humidity-box-4">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <!-- Dewpoint Boxes -->
-    <div class="draggable dewpoint-box" id="dewpoint-box-1">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable dewpoint-box" id="dewpoint-box-2">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable dewpoint-box" id="dewpoint-box-3">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable dewpoint-box" id="dewpoint-box-4">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <!-- Wind Boxes -->
-    <div class="draggable wind-box" id="wind-box-1">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable wind-box" id="wind-box-2">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable wind-box" id="wind-box-3">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable wind-box" id="wind-box-4">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <!-- Conditions Boxes -->
-    <div class="draggable condition-box" id="condition-box-1">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable condition-box" id="condition-box-2">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable condition-box" id="condition-box-3">
-      <div class="drag-info"></div>
-      --
-    </div>
-    <div class="draggable condition-box" id="condition-box-4">
-      <div class="drag-info"></div>
-      --
+  </div>
+
+  <!-- Password Overlay -->
+  <div id="password-overlay">
+    <div id="password-container">
+      <h2>Please Enter Password</h2>
+      <input type="password" id="password-input" placeholder="Enter password" />
+      <button id="password-btn">Unlock</button>
+      <p id="password-error"></p>
     </div>
   </div>
 
@@ -287,7 +343,6 @@
     /***************************************
      * Station Code Mappings
      ***************************************/
-    // Weather Underground station codes and display names.
     const wuStations = {
       'KOHCHILL102': 'Chillicothe',
       'KOHCOLUM839': 'Columbus',
@@ -319,7 +374,6 @@
       'KOHCOSHO14': 'Coshocton'
     };
 
-    // Mapping from Weather Underground station codes to NWS station codes.
     const nwsMapping = {
       'KOHCHILL102': 'KRZT',
       'KOHCOLUM839': 'KCMH',
@@ -351,7 +405,6 @@
       'KOHCOSHO14': 'KZZV'
     };
 
-    // Store the selected WU station for each city box (indices 0–3)
     let selectedStations = [null, null, null, null];
 
     /***************************************
@@ -446,7 +499,6 @@
       }
     };
 
-    // Set each box’s initial position.
     function setInitialPositions() {
       for (let group in initialPositions) {
         for (let boxId in initialPositions[group]) {
@@ -454,7 +506,6 @@
           const pos = initialPositions[group][boxId];
           box.style.top = pos.top + 'px';
           box.style.left = pos.left + 'px';
-          // Apply style configurations to boxes when appropriate.
           if (box.classList.contains('temp-box')) {
             box.style.fontSize = tempBoxConfig.fontSize;
             box.style.fontFamily = tempBoxConfig.fontFamily;
@@ -489,7 +540,6 @@
           }
         }
       }
-      // Apply city name configuration to all .city-name elements.
       document.querySelectorAll('.city-name').forEach(el => {
         el.style.fontSize = cityNameConfig.fontSize;
         el.style.color = cityNameConfig.color;
@@ -531,7 +581,7 @@
     }
 
     /***************************************
-     * Populate Dropdowns for City Boxes (Using WU Stations)
+     * Populate Dropdowns for City Boxes
      ***************************************/
     function populateDropdowns() {
       const sortedStationIds = Object.keys(wuStations).sort((a, b) => {
@@ -560,20 +610,16 @@
      ***************************************/
     function selectCity(boxIndex, stationId) {
       selectedStations[boxIndex - 1] = stationId;
-      // Update city box display
       const cityBox = document.getElementById(`city-box-${boxIndex}`);
       cityBox.querySelector('.city-name').textContent = wuStations[stationId];
-      // Update all data boxes using the Weather Underground API
       updateTemperatureBox(boxIndex, stationId);
       updateFeelsBox(boxIndex, stationId);
       updateHumidityBox(boxIndex, stationId);
       updateDewpointBox(boxIndex, stationId);
       updateWindBox(boxIndex, stationId);
-      // Update conditions box using the NWS API (via the nwsMapping)
       updateConditionBox(boxIndex, stationId);
     }
 
-    // Weather Underground API calls (for temperature, feels like, humidity, dewpoint, wind)
     function fetchWeather(stationId) {
       const apiUrl = `https://api.weather.com/v2/pws/observations/current?stationId=${stationId}&format=json&units=e&apiKey=8caa9f6756a74d03aa9f6756a79d03a3`;
       return fetch(apiUrl)
@@ -697,9 +743,6 @@
       });
     }
 
-    /***************************************
-     * NWS API – Fetching the Current Condition (Async/Await)
-     ***************************************/
     async function fetchCondition(stationCode) {
       try {
         const response = await fetch(`https://api.weather.gov/stations/${stationCode}/observations/latest`, {
@@ -742,14 +785,34 @@
 
       // Right-click on the container to save the background with overlay
       document.getElementById('draggable-container').addEventListener('contextmenu', function(e) {
-        e.preventDefault(); // Prevent the default context menu
+        e.preventDefault();
         html2canvas(this, { useCORS: true }).then(canvas => {
-          // Create a temporary link to trigger the download
           const link = document.createElement('a');
           link.download = 'background-overlay.png';
           link.href = canvas.toDataURL();
           link.click();
         });
+      });
+
+      /***************************************
+       * Password Overlay Handling
+       ***************************************/
+      const passwordInput = document.getElementById('password-input');
+      const passwordBtn = document.getElementById('password-btn');
+
+      function checkPassword() {
+        if (passwordInput.value === "Belpark#2025!") {
+          // Remove overlay and clear blur on main content
+          document.getElementById('password-overlay').remove();
+          document.getElementById('main-content').style.filter = 'none';
+        } else {
+          document.getElementById('password-error').textContent = "Incorrect password. Please try again.";
+        }
+      }
+
+      passwordBtn.addEventListener('click', checkPassword);
+      passwordInput.addEventListener('keypress', function(e) {
+        if (e.key === "Enter") checkPassword();
       });
     });
   </script>
